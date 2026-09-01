@@ -237,6 +237,17 @@ function writeCsv(filePath, rows) {
   fs.writeFileSync(filePath, "﻿" + lines.join("\n") + "\n", "utf8");
 }
 
+/**
+ * يضيف المتاجر الجديدة اللي انلقت بهالتشغيلة لملف known_stores.csv،
+ * عشان بالمرة الجاية تنعتبر "معروفة" ومايتكررش ظهورها من جديد.
+ */
+function appendToKnownStores(filePath, rows) {
+  if (!rows.length) return;
+  const lines = rows.map((r) => [r.category, r.title, r.url].map(csvEscape).join(",")).join("\n") + "\n";
+  // ملاحظة: بدون BOM هون، حتى ما ينكتب BOM جديد بمنتصف الملف مع كل تشغيلة.
+  fs.appendFileSync(filePath, lines, "utf8");
+}
+
 async function main() {
   const knownStores = loadKnownStores(KNOWN_STORES_FILE);
   console.log(`محمّل ${knownStores.size} متجر معروف من '${path.basename(KNOWN_STORES_FILE)}' - رح يتم استبعادهم.`);
@@ -276,9 +287,15 @@ async function main() {
 
   writeCsv(OUTPUT_FILE, allResults);
 
+  // إضافة المتاجر الجديدة لقائمة المعروفين عشان ما تتكرر بالتشغيلة الجاية
+  appendToKnownStores(KNOWN_STORES_FILE, allResults);
+
   const withEmail = allResults.filter((r) => r.email).length;
   console.log(`\n✅ خلص! جمعت ${allResults.length} موقع فريد جديد (${withEmail} فيهم إيميل).`);
   console.log(`📄 محفوظين بملف: ${path.basename(OUTPUT_FILE)}`);
+  if (allResults.length) {
+    console.log(`📌 تمت إضافتهم كمان لملف '${path.basename(KNOWN_STORES_FILE)}' عشان ما يتكرروا بالمرة الجاية.`);
+  }
 }
 
 main().catch((err) => {

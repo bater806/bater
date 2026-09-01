@@ -196,6 +196,21 @@ def fetch_store_email(url):
     return ""
 
 
+def append_to_known_stores(path, results):
+    """
+    يضيف المتاجر الجديدة اللي انلقت بهالتشغيلة لملف known_stores.csv،
+    عشان بالمرة الجاية تنعتبر "معروفة" ومايتكررش ظهورها من جديد.
+    """
+    if not results:
+        return
+    # ملاحظة: لازم encoding="utf-8" (مو utf-8-sig) بوضع الإضافة، حتى ما
+    # ينكتب BOM جديد بمنتصف الملف مع كل تشغيلة.
+    with open(path, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        for r in results:
+            writer.writerow([r["category"], r["title"], r["url"]])
+
+
 def search_category(ddgs, category, platform):
     query = f"{platform} متجر {category} تم شراءه"
     results_found = []
@@ -257,9 +272,14 @@ def main():
         writer.writeheader()
         writer.writerows(all_results)
 
+    # إضافة المتاجر الجديدة لقائمة المعروفين عشان ما تتكرر بالتشغيلة الجاية
+    append_to_known_stores(KNOWN_STORES_FILE, all_results)
+
     with_email = sum(1 for r in all_results if r["email"])
     print(f"\n✅ خلص! جمعت {len(all_results)} موقع فريد جديد ({with_email} فيهم إيميل).")
     print(f"📄 محفوظين بملف: {OUTPUT_FILE}")
+    if all_results:
+        print(f"📌 تمت إضافتهم كمان لملف '{KNOWN_STORES_FILE}' عشان ما يتكرروا بالمرة الجاية.")
 
 
 if __name__ == "__main__":
