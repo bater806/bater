@@ -64,7 +64,7 @@ const CATEGORIES = [
 
 const PLATFORMS = ["site:salla.sa", "site:zid.store"];
 
-const RESULTS_PER_QUERY = 10;
+const RESULTS_PER_QUERY = 100;
 const OUTPUT_FILE = path.join(__dirname, "found_stores_bulk.csv");
 const KNOWN_STORES_FILE = path.join(__dirname, "known_stores.csv");
 const DELAY_BETWEEN_SEARCHES_MS = 3000; // مهم جداً عشان ما تنحظر من محرك البحث

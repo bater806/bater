@@ -83,7 +83,7 @@ CATEGORIES = [
 
 PLATFORMS = ["site:salla.sa", "site:zid.store"]
 
-RESULTS_PER_QUERY = 10
+RESULTS_PER_QUERY = 100
 OUTPUT_FILE = "found_stores_bulk.csv"
 KNOWN_STORES_FILE = "known_stores.csv"
 DELAY_BETWEEN_SEARCHES = 3  # ثواني - مهم جداً عشان ما تنحظر من محرك البحث
