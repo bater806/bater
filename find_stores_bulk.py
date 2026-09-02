@@ -237,7 +237,7 @@ def append_to_known_stores(path, results):
 
 
 def search_category(ddgs, category, platform):
-    query = f"{platform} متجر {category} تم شراءه"
+    query = f"{platform} متجر {category}"
     results_found = []
     try:
         # region="wt-wt" (بدون تقييد جغرافي) عشان ما نفوّت نتائج، حتى لو

@@ -224,7 +224,7 @@ async function fetchStoreEmail(url) {
 }
 
 async function searchCategory(category, platform) {
-  const query = `${platform} متجر ${category} تم شراءه`;
+  const query = `${platform} متجر ${category}`;
   const resultsFound = [];
   try {
     // بدون تقييد "region" جغرافي عشان ما نفوّت نتائج، حتى لو طلعت مواقع
