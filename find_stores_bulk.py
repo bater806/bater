@@ -9,7 +9,7 @@
 
 طريقة الاستخدام:
 1) نصّب المكتبات (مرة وحدة):
-   pip install duckduckgo-search requests --break-system-packages
+   pip install ddgs requests --break-system-packages
 
 2) شغل السكربت:
    python3 find_stores_bulk.py
@@ -29,10 +29,15 @@ import time
 from urllib.parse import urlparse
 
 try:
-    from duckduckgo_search import DDGS
+    # ddgs هي النسخة الجديدة المدعومة من duckduckgo_search (نفس API تقريباً).
+    # النسخة القديمة صارت غير موثوقة وبترجع نتائج فاضية بصمت أحياناً.
+    from ddgs import DDGS
 except ImportError:
-    print("لازم تنصب المكتبة أول: pip install duckduckgo-search --break-system-packages")
-    raise SystemExit
+    try:
+        from duckduckgo_search import DDGS
+    except ImportError:
+        print("لازم تنصب المكتبة أول: pip install ddgs --break-system-packages")
+        raise SystemExit
 
 try:
     import requests
