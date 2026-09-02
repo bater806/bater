@@ -246,8 +246,14 @@ def search_category(ddgs, category, platform):
     results_found = []
     try:
         # region="wt-wt" (بدون تقييد جغرافي) عشان ما نفوّت نتائج، حتى لو
-        # طلعت مواقع غير سعودية/خليجية - سلة وزد أصلاً بيقيدوا الدومين
-        results = ddgs.text(query, region="wt-wt", max_results=RESULTS_PER_QUERY)
+        # طلعت مواقع غير سعودية/خليجية - سلة وزد أصلاً بيقيدوا الدومين.
+        # backend="duckduckgo": مكتبة ddgs الجديدة بتجرب كذا محرك بحث
+        # بوضع "auto" (منها wikipedia)، ومحرك wikipedia بيفشل مع
+        # region="wt-wt" (بيحاول يوصل لدومين wt.wikipedia.org غير موجود)
+        # وهاد كان بيلغي نتيجة الاستعلام كامل. تثبيت duckduckgo بس بيمنع هالمشكلة.
+        results = ddgs.text(
+            query, region="wt-wt", max_results=RESULTS_PER_QUERY, backend="duckduckgo"
+        )
         for r in results:
             url = r.get("href") or r.get("url")
             title = r.get("title", "")
