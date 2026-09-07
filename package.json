@@ -1,0 +1,16 @@
+{
+  "name": "bulk-store-scraper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "سكربت جمع متاجر سلة وزد (JavaScript) مع سحب إيميلات التواصل واستبعاد المتاجر المعروفة مسبقاً",
+  "main": "find_stores_bulk.js",
+  "scripts": {
+    "start": "node find_stores_bulk.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "duck-duck-scrape": "^2.2.7"
+  }
+}
