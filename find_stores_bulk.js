@@ -128,10 +128,10 @@ const CATEGORIES = [
 
 const PLATFORMS = ["site:salla.sa", "site:zid.store"];
 
-const RESULTS_PER_QUERY = 100;
+const RESULTS_PER_QUERY = 30;
 const OUTPUT_FILE = path.join(__dirname, "found_stores_bulk.csv");
 const KNOWN_STORES_FILE = path.join(__dirname, "known_stores.csv");
-const DELAY_BETWEEN_SEARCHES_MS = 3000; // مهم جداً عشان ما تنحظر من محرك البحث
+const DELAY_BETWEEN_SEARCHES_MS = 5000; // مهم جداً عشان ما تنحظر من محرك البحث
 const DELAY_BETWEEN_EMAIL_FETCHES_MS = 2000; // فاصل بين زيارة كل متجر لسحب الإيميل
 
 const EXCLUDE_KEYWORDS = [
