@@ -2,8 +2,9 @@
  * سكربت جمع المتاجر الشامل - نسخة JavaScript (Node.js)
  * ==========================================
  * نفس منطق find_stores_bulk.py: يبحث تلقائياً عن مئات متاجر سلة وزد
- * بمجالات كتيرة، يتجاهل أي متجر موجود مسبقاً بـ known_stores.csv (بغض
- * النظر عن المجال)، وبيحاول يسحب إيميل التواصل من كل متجر جديد.
+ * وشوبيفاي بمجالات كتيرة، يتجاهل أي متجر موجود مسبقاً بـ
+ * known_stores.csv (بغض النظر عن المجال)، وبيحاول يسحب إيميل التواصل
+ * من كل متجر جديد.
  *
  * طريقة الاستخدام:
  * 1) نصّب المكتبات (مرة وحدة، يتطلب Node.js 18+ لتوفر fetch المدمج):
@@ -127,7 +128,12 @@ const CATEGORIES = [
   "زينة اليوم الوطني والمناسبات الوطنية",
 ];
 
-const PLATFORMS = ["site:salla.sa", "site:zid.store"];
+// سلة وزد: بنستخدم site: لأنهم كل المتاجر عليهم لازم يكون رابطها تحت
+// دومين المنصة (salla.sa/store-slug أو store.zid.store).
+// شوبيفاي: بدون site: لأنه أغلب المتاجر الجدية بتستخدم دومين خاص فيها
+// (مش something.myshopify.com)، فـ site:myshopify.com كان رح يفوّت
+// أغلب المتاجر الحقيقية. هون بندور بكلمة "شوبيفاي" بدل قيد الدومين.
+const PLATFORMS = ["site:salla.sa", "site:zid.store", "شوبيفاي"];
 
 const RESULTS_PER_QUERY = 30;
 const OUTPUT_FILE = path.join(__dirname, "found_stores_bulk.csv");
@@ -138,6 +144,11 @@ const DELAY_BETWEEN_EMAIL_FETCHES_MS = 2000; // فاصل بين زيارة كل 
 const EXCLUDE_KEYWORDS = [
   "amazon", "noon", "jumia", "شركة سلة", "منصة سلة", "help.salla",
   "docs.salla", "academy.salla", "blog.salla",
+  // صفحات شوبيفاي نفسها (الشركة) مش متاجر عملاء - نستبعدها لأنه بحث
+  // شوبيفاي بدون site: بيرجع صفحات شوبيفاي الرسمية كمان أحياناً
+  "help.shopify.com", "apps.shopify.com", "community.shopify.com",
+  "themes.shopify.com", "www.shopify.com", "blog.shopify",
+  "shopify.com/blog", "shopify.com/legal", "changelog.shopify.com",
 ];
 
 // مسارات صفحات "تواصل معنا" الشائعة بمتاجر سلة وزد - تنجرب لو ما انلقى

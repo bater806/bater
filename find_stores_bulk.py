@@ -1,8 +1,8 @@
 """
 سكربت جمع المتاجر الشامل - نسخة محسّنة
 ==========================================
-يبحث تلقائياً عن مئات متاجر سلة وزد بمجالات كتيرة، ويجمعهم بملف واحد،
-وبيحاول كمان يسحب إيميل التواصل من كل متجر جديد.
+يبحث تلقائياً عن مئات متاجر سلة وزد وشوبيفاي بمجالات كتيرة، ويجمعهم
+بملف واحد، وبيحاول كمان يسحب إيميل التواصل من كل متجر جديد.
 
 يتجاهل السكربت أي متجر موجود مسبقاً بملف known_stores.csv (نفس القائمة
 اللي جمعتها يدوياً) - حتى لو طلع تحت مجال مختلف، ما رح يتكرر معك.
@@ -150,7 +150,12 @@ CATEGORIES = [
     "زينة اليوم الوطني والمناسبات الوطنية",
 ]
 
-PLATFORMS = ["site:salla.sa", "site:zid.store"]
+# سلة وزد: بنستخدم site: لأنهم كل المتاجر عليهم لازم يكون رابطها تحت
+# دومين المنصة (salla.sa/store-slug أو store.zid.store).
+# شوبيفاي: بدون site: لأنه أغلب المتاجر الجدية بتستخدم دومين خاص فيها
+# (مش something.myshopify.com)، فـ site:myshopify.com كان رح يفوّت
+# أغلب المتاجر الحقيقية. هون بندور بكلمة "شوبيفاي" بدل قيد الدومين.
+PLATFORMS = ["site:salla.sa", "site:zid.store", "شوبيفاي"]
 
 RESULTS_PER_QUERY = 30
 OUTPUT_FILE = "found_stores_bulk.csv"
@@ -161,6 +166,11 @@ DELAY_BETWEEN_EMAIL_FETCHES = 2  # ثواني - فاصل بين زيارة كل 
 EXCLUDE_KEYWORDS = [
     "amazon", "noon", "jumia", "شركة سلة", "منصة سلة", "help.salla",
     "docs.salla", "academy.salla", "blog.salla",
+    # صفحات شوبيفاي نفسها (الشركة) مش متاجر عملاء - نستبعدها لأنه بحث
+    # شوبيفاي بدون site: بيرجع صفحات شوبيفاي الرسمية كمان أحياناً
+    "help.shopify.com", "apps.shopify.com", "community.shopify.com",
+    "themes.shopify.com", "www.shopify.com", "blog.shopify",
+    "shopify.com/blog", "shopify.com/legal", "changelog.shopify.com",
 ]
 
 # مسارات صفحات "تواصل معنا" الشائعة بمتاجر سلة وزد - تنجرب لو ما انلقى
