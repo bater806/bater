@@ -327,34 +327,67 @@ def search_category(ddgs, category, platform):
     return results_found
 
 
+def ask_search_limit(total_available):
+    """
+    يسأل المستخدم كم عملية بحث يشتغل هالمرة، عشان يقدر يحدد رقم أقل لو
+    رح يوقف الجهاز قريب. Enter فاضي = يشتغل عليهم كلهم.
+    """
+    prompt = (
+        f"كم عملية بحث تحب يشتغل عليها هالمرة؟ "
+        f"(في المجموع {total_available} - دوس Enter للكل): "
+    )
+    try:
+        raw = input(prompt).strip()
+    except EOFError:
+        return total_available
+
+    if not raw:
+        return total_available
+
+    try:
+        n = int(raw)
+    except ValueError:
+        print("رقم غير صالح - رح يشتغل على الكل.")
+        return total_available
+
+    if n <= 0:
+        print("لازم رقم أكبر من صفر - رح يشتغل على الكل.")
+        return total_available
+
+    return min(n, total_available)
+
+
 def main():
     known_stores = load_known_stores(KNOWN_STORES_FILE)
     print(f"محمّل {len(known_stores)} متجر معروف من '{KNOWN_STORES_FILE}' - رح يتم استبعادهم.")
+
+    search_tasks = [(category, platform) for category in CATEGORIES for platform in PLATFORMS]
+    limit = ask_search_limit(len(search_tasks))
+    search_tasks = search_tasks[:limit]
 
     all_results = []
     seen_keys = set()
 
     with DDGS() as ddgs:
-        total_searches = len(CATEGORIES) * len(PLATFORMS)
+        total_searches = len(search_tasks)
         current = 0
 
-        for category in CATEGORIES:
-            for platform in PLATFORMS:
-                current += 1
-                print(f"[{current}/{total_searches}] بدور على: {category} ({platform})")
+        for category, platform in search_tasks:
+            current += 1
+            print(f"[{current}/{total_searches}] بدور على: {category} ({platform})")
 
-                results = search_category(ddgs, category, platform)
-                new_count = 0
-                for r in results:
-                    key = normalize_store_key(r["url"])
-                    if not key or key in known_stores or key in seen_keys:
-                        continue
-                    seen_keys.add(key)
-                    all_results.append(r)
-                    new_count += 1
+            results = search_category(ddgs, category, platform)
+            new_count = 0
+            for r in results:
+                key = normalize_store_key(r["url"])
+                if not key or key in known_stores or key in seen_keys:
+                    continue
+                seen_keys.add(key)
+                all_results.append(r)
+                new_count += 1
 
-                print(f"   لقيت {new_count} موقع جديد (الإجمالي: {len(all_results)})")
-                time.sleep(DELAY_BETWEEN_SEARCHES)
+            print(f"   لقيت {new_count} موقع جديد (الإجمالي: {len(all_results)})")
+            time.sleep(DELAY_BETWEEN_SEARCHES)
 
     # سحب الإيميلات للمتاجر الجديدة فقط
     print(f"\nبدأ سحب الإيميلات لـ {len(all_results)} متجر جديد...")

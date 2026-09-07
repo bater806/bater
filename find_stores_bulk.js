@@ -19,6 +19,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const readline = require("readline/promises");
 const { search, SafeSearchType } = require("duck-duck-scrape");
 
 // ------------------------------------------------------------------
@@ -335,33 +336,72 @@ function appendToKnownStores(filePath, rows) {
   fs.appendFileSync(filePath, lines, "utf8");
 }
 
+/**
+ * يسأل المستخدم كم عملية بحث يشتغل هالمرة، عشان يقدر يحدد رقم أقل لو
+ * رح يوقف الجهاز قريب. Enter فاضي = يشتغل عليهم كلهم.
+ */
+async function askSearchLimit(totalAvailable) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  let raw;
+  try {
+    raw = (
+      await rl.question(
+        `كم عملية بحث تحب يشتغل عليها هالمرة؟ (في المجموع ${totalAvailable} - دوس Enter للكل): `
+      )
+    ).trim();
+  } finally {
+    rl.close();
+  }
+
+  if (!raw) return totalAvailable;
+
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n) || Number.isNaN(n)) {
+    console.log("رقم غير صالح - رح يشتغل على الكل.");
+    return totalAvailable;
+  }
+  if (n <= 0) {
+    console.log("لازم رقم أكبر من صفر - رح يشتغل على الكل.");
+    return totalAvailable;
+  }
+
+  return Math.min(n, totalAvailable);
+}
+
 async function main() {
   const knownStores = loadKnownStores(KNOWN_STORES_FILE);
   console.log(`محمّل ${knownStores.size} متجر معروف من '${path.basename(KNOWN_STORES_FILE)}' - رح يتم استبعادهم.`);
 
-  const allResults = [];
-  const seenKeys = new Set();
-  const totalSearches = CATEGORIES.length * PLATFORMS.length;
-  let current = 0;
-
+  let searchTasks = [];
   for (const category of CATEGORIES) {
     for (const platform of PLATFORMS) {
-      current += 1;
-      console.log(`[${current}/${totalSearches}] بدور على: ${category} (${platform})`);
-
-      const results = await searchCategory(category, platform);
-      let newCount = 0;
-      for (const r of results) {
-        const key = normalizeStoreKey(r.url);
-        if (!key || knownStores.has(key) || seenKeys.has(key)) continue;
-        seenKeys.add(key);
-        allResults.push(r);
-        newCount += 1;
-      }
-
-      console.log(`   لقيت ${newCount} موقع جديد (الإجمالي: ${allResults.length})`);
-      await sleep(DELAY_BETWEEN_SEARCHES_MS);
+      searchTasks.push([category, platform]);
     }
+  }
+  const limit = await askSearchLimit(searchTasks.length);
+  searchTasks = searchTasks.slice(0, limit);
+
+  const allResults = [];
+  const seenKeys = new Set();
+  const totalSearches = searchTasks.length;
+  let current = 0;
+
+  for (const [category, platform] of searchTasks) {
+    current += 1;
+    console.log(`[${current}/${totalSearches}] بدور على: ${category} (${platform})`);
+
+    const results = await searchCategory(category, platform);
+    let newCount = 0;
+    for (const r of results) {
+      const key = normalizeStoreKey(r.url);
+      if (!key || knownStores.has(key) || seenKeys.has(key)) continue;
+      seenKeys.add(key);
+      allResults.push(r);
+      newCount += 1;
+    }
+
+    console.log(`   لقيت ${newCount} موقع جديد (الإجمالي: ${allResults.length})`);
+    await sleep(DELAY_BETWEEN_SEARCHES_MS);
   }
 
   console.log(`\nبدأ سحب الإيميلات لـ ${allResults.length} متجر جديد...`);
